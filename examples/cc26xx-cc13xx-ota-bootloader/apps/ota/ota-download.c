@@ -78,13 +78,18 @@ firmware_chunk_handler(void *response)
       if ( !active_ota_download_slot ) {
         active_ota_download_slot = 1;
       }
+      PRINTF("Downloading OTA update to OTA slot #%i.\n", active_ota_download_slot);
+
+      //  (3) Erase the destination OTA download slot
+      while( erase_ota_image( active_ota_download_slot ) );
+
+      PRINTF("==============================================\n\n");
     }
-    PRINTF("Downloading OTA update to OTA slot #%i.\n", active_ota_download_slot);
-
-    //  (3) Erase the destination OTA download slot
-    while( erase_ota_image( active_ota_download_slot ) );
-
-    PRINTF("==============================================\n\n");
+    else {
+      PRINTF("OTA image is up to date in slot #%i.\n", active_ota_download_slot);
+      ota_download_active = false;
+      process_post(&ota_download_th, PROCESS_EVENT_EXIT, NULL);
+    }
   }
 
   //  (4) Save the latest ota_buffer to flash if it's full.
